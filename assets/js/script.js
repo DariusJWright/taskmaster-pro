@@ -96,7 +96,9 @@ $(".list-group").on("blur", "textarea", function () {
 // due date was clicked
 $(".list-group").on("click", "span", function() {
   // get current text
-  var date = $(this).text().trim();
+  var date = $(this)
+    .text()
+    .trim();
     
   // create new input element
   var dateInput = $("<input>")
@@ -137,7 +139,7 @@ $(".list-group").on("change", "input[type='text']", function() {
   var index = $(this)
     .closest(".list-group-item")
     .index();
-
+  
   // update task in array and re-save to localstorage
   tasks[status][index].date = date;
   saveTasks();
@@ -167,7 +169,7 @@ $("#task-form-modal").on("shown.bs.modal", function() {
 });
 
 // save button in modal was clicked
-$("#task-form-modal .btn-primary").click(function() {
+$("#task-form-modal .btn-save").click(function() {
   // get form values
   var taskText = $("#modalTaskDescription").val();
   var taskDate = $("#modalDueDate").val();
@@ -203,17 +205,20 @@ $(".card .list-group").sortable({
   tolerance: "pointer",
   helper: "clone",
   activate: function(event) {
-    console.log("activate", this);
+    $(this).addClass("dropover");
+    $(".bottom-trash").addClass("bottom-class-drag");
   },
   deactivate: function(event) {
-    console.log("deactivate", this);
+    $(this).removeClass("dropover");
+    $(".bottom-trash").removeClass("bottom-class-drag");
   },
   over: function(event) {
-    console.log("over", event.target);
+    $(event.target).addClass("dropover-active");
   },
   out: function(event) {
-    console.log("out", event.target);
+    $(event.target).removeClass("dropover-active");
   },
+
   update: function(event) {
     // array to store the task data in
     var tempArr = [];
@@ -253,15 +258,15 @@ $(".card .list-group").sortable({
 $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
+  over: function(event, ui) {
+    $(".bottom-trash").addClass("bottom-trash-active");
+  },
   drop: function(event, ui) {
-    console.log("drop");
+    $(".bottom-trash").removeClass("bottom-trash-active");
     ui.draggable.remove();
   },
-  over: function(event, ui) {
-    console.log("over");
-  },
   out: function(event, ui) {
-    console.log("out");
+    $(".bottom-trash").removeClass("bottom-trash-active");
   }
   
 });
@@ -289,8 +294,14 @@ var auditTask = function(taskEl) {
   else if (Math.abs(moment().diff(time, "days")) <= 2) {
     $(taskEl).addClass("list-group-item-warning");
   }
+  
 };
 
+setInterval(function() {
+  $(".card .list-group-item").each(function (el) {
+    auditTask(el);
+  });
+}, 1800000);
 // load tasks for the first time
 loadTasks();
 
